@@ -1,0 +1,13 @@
+#!/bin/bash
+cd ../data && \
+../../../bin/gconvert tileset.xml && \
+../../../bin/gconvert sprites.xml && \
+../../../bin/gconvert titlescreen.xml && \
+../../../bin/gconvert win_tileset.xml && \
+../../../bin/midiconv -f 4 Piano_Version_Ochama_Kinou_Pauses_Removed2_multi_labeled.mid mainsong.h && \
+cd ../oracle2 && \
+make && \
+./main > sorted_netlists_and_led_states.inc && \
+cd ../default && \
+make clean && \
+make

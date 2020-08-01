@@ -1,0 +1,94 @@
+<?xml version="1.0" ?>
+<gfx-xform version="1">
+  <input file="tileset.png" type="png" tile-width="8" tile-height="8" />
+  <output file="tileset.inc" remove-duplicate-tiles="true">
+    <tiles var-name="tileset"/>
+    <maps pointers-size="8">
+      <map left="14" top="0"  width="7"  height="1"  var-name="map_circuit" />
+      <map left="21" top="0"  width="11" height="1"  var-name="map_meetsrules" />
+      <map left="32" top="0"  width="11" height="1"  var-name="map_addtogrid" />
+
+      <map left="0"  top="2"  width="3"  height="3"  var-name="map_vcc_t" />
+      <map left="4"  top="2"  width="3"  height="3"  var-name="map_vcc_r" />
+      <map left="8"  top="2"  width="3"  height="3"  var-name="map_vcc_b" />
+      <map left="12" top="2"  width="3"  height="3"  var-name="map_vcc_l" />
+      <map left="16" top="2"  width="3"  height="3"  var-name="map_gnd_ltr" />
+      <map left="20" top="2"  width="3"  height="3"  var-name="map_gnd_trb" />
+      <map left="24" top="2"  width="3"  height="3"  var-name="map_gnd_rbl" />
+      <map left="28" top="2"  width="3"  height="3"  var-name="map_gnd_blt" />
+      <map left="32" top="2"  width="3"  height="3"  var-name="map_sw1_bl" />
+      <map left="36" top="2"  width="3"  height="3"  var-name="map_sw1_lt" />
+      <map left="40" top="2"  width="3"  height="3"  var-name="map_sw1_tr" />
+      <map left="44" top="2"  width="3"  height="3"  var-name="map_sw1_rb" />
+
+      <map left="0"  top="6"  width="3"  height="3"  var-name="map_rled_off_ab_cr" />
+      <map left="4"  top="6"  width="3"  height="3"  var-name="map_rled_off_al_cb" />
+      <map left="8"  top="6"  width="3"  height="3"  var-name="map_rled_off_at_cl" />
+      <map left="12" top="6"  width="3"  height="3"  var-name="map_rled_off_ar_ct" />
+      <map left="16" top="6"  width="3"  height="3"  var-name="map_rled_on_ab_cr" />
+      <map left="20" top="6"  width="3"  height="3"  var-name="map_rled_on_al_cb" />
+      <map left="24" top="6"  width="3"  height="3"  var-name="map_rled_on_at_cl" />
+      <map left="28" top="6"  width="3"  height="3"  var-name="map_rled_on_ar_ct" />
+      <map left="32" top="6"  width="3"  height="3"  var-name="map_sw2_bt" />
+      <map left="36" top="6"  width="3"  height="3"  var-name="map_sw2_lr" />
+      <map left="40" top="6"  width="3"  height="3"  var-name="map_sw2_tb" />
+      <map left="44" top="6"  width="3"  height="3"  var-name="map_sw2_rl" />
+
+      <map left="0"  top="10" width="3"  height="3"  var-name="map_yled_off_al_cr" />
+      <map left="4"  top="10" width="3"  height="3"  var-name="map_yled_off_at_cb" />
+      <map left="8"  top="10" width="3"  height="3"  var-name="map_yled_off_ar_cl" />
+      <map left="12" top="10" width="3"  height="3"  var-name="map_yled_off_ab_ct" />
+      <map left="16" top="10" width="3"  height="3"  var-name="map_yled_on_al_cr" />
+      <map left="20" top="10" width="3"  height="3"  var-name="map_yled_on_at_cb" />
+      <map left="24" top="10" width="3"  height="3"  var-name="map_yled_on_ar_cl" />
+      <map left="28" top="10" width="3"  height="3"  var-name="map_yled_on_ab_ct" />
+      <map left="32" top="10" width="3"  height="3"  var-name="map_sw3_br" />
+      <map left="36" top="10" width="3"  height="3"  var-name="map_sw3_lb" />
+      <map left="40" top="10" width="3"  height="3"  var-name="map_sw3_tl" />
+      <map left="44" top="10" width="3"  height="3"  var-name="map_sw3_rt" />
+
+      <map left="0"  top="14" width="3"  height="3"  var-name="map_gled_off_ab_cl" />
+      <map left="4"  top="14" width="3"  height="3"  var-name="map_gled_off_al_ct" />
+      <map left="8"  top="14" width="3"  height="3"  var-name="map_gled_off_at_cr" />
+      <map left="12" top="14" width="3"  height="3"  var-name="map_gled_off_ar_cb" />
+      <map left="16" top="14" width="3"  height="3"  var-name="map_gled_on_ab_cl" />
+      <map left="20" top="14" width="3"  height="3"  var-name="map_gled_on_al_ct" />
+      <map left="24" top="14" width="3"  height="3"  var-name="map_gled_on_at_cr" />
+      <map left="28" top="14" width="3"  height="3"  var-name="map_gled_on_ar_cb" />
+      <map left="32" top="14" width="3"  height="3"  var-name="map_goal_rled_off" />
+      <map left="36" top="14" width="3"  height="3"  var-name="map_goal_yled_off" />
+      <map left="40" top="14" width="3"  height="3"  var-name="map_goal_gled_off" />
+      <map left="44" top="14" width="3"  height="3"  var-name="map_blank" />
+
+      <map left="0"  top="18" width="3"  height="3"  var-name="map_straight_lr" />
+      <map left="4"  top="18" width="3"  height="3"  var-name="map_straight_tb" />
+      <map left="8"  top="18" width="3"  height="3"  var-name="map_dbl_corner_tl_br" />
+      <map left="12" top="18" width="3"  height="3"  var-name="map_dbl_corner_tr_bl" />
+      <map left="16" top="18" width="3"  height="3"  var-name="map_corner_bl" />
+      <map left="20" top="18" width="3"  height="3"  var-name="map_corner_tl" />
+      <map left="24" top="18" width="3"  height="3"  var-name="map_corner_tr" />
+      <map left="28" top="18" width="3"  height="3"  var-name="map_corner_br" />
+      <map left="32" top="18" width="3"  height="3"  var-name="map_goal_rled_on" />
+      <map left="36" top="18" width="3"  height="3"  var-name="map_goal_yled_on" />
+      <map left="40" top="18" width="3"  height="3"  var-name="map_goal_gled_on" />
+      <map left="44" top="18" width="3"  height="3"  var-name="map_blank_sel" />
+
+      <map left="0"  top="22" width="3"  height="3"  var-name="map_tpiece_rbl" />
+      <map left="4"  top="22" width="3"  height="3"  var-name="map_tpiece_blt" />
+      <map left="8"  top="22" width="3"  height="3"  var-name="map_tpiece_ltr" />
+      <map left="12" top="22" width="3"  height="3"  var-name="map_tpiece_trb" />
+      <map left="16" top="22" width="3"  height="3"  var-name="map_bridge1_tb_lr" />
+      <map left="20" top="22" width="3"  height="3"  var-name="map_bridge2_tb_lr" />
+      <map left="24" top="22" width="3"  height="3"  var-name="map_blocker" />
+      <map left="28" top="22" width="3"  height="3"  var-name="map_flat" />
+      <map left="0"  top="26" width="9"  height="1"  var-name="map_controls_lr" />
+      <map left="0"  top="28" width="3"  height="3"  var-name="map_controls_dpad" />
+      <map left="6"  top="28" width="3"  height="2"  var-name="map_controls_a" />
+      <map left="4"  top="30" width="4"  height="2"  var-name="map_controls_b" />
+      <map left="9"  top="26" width="9"  height="1"  var-name="map_controls_lr_off" />
+      <map left="9"  top="28" width="3"  height="3"  var-name="map_controls_dpad_off" />
+      <map left="15"  top="28" width="3"  height="2"  var-name="map_controls_a_off" />
+      <map left="13"  top="30" width="4"  height="2"  var-name="map_controls_b_off" />
+    </maps>
+  </output>
+</gfx-xform>

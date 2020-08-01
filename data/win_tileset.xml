@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<gfx-xform version="1">
+  <input file="win_tileset.png" type="png" tile-width="8" tile-height="8" />
+  <output file="win_tileset.inc" remove-duplicate-tiles="true">
+    <tiles var-name="win_tileset"/>
+    <maps pointers-size="8">
+      <map left="1" top="0"  width="5"  height="8"  var-name="map_win_left" />
+      <map left="6" top="0"  width="5"  height="8"  var-name="map_win_right" />
+    </maps>
+  </output>
+</gfx-xform>
