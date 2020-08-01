@@ -66,7 +66,7 @@ static void LoadHighScore(uint8_t* const bits)
   if (retval == EEPROM_ERROR_BLOCK_NOT_FOUND || save.version == 0xFFFF) {
     save.id = EEPROM_ID;
     save.version = EEPROM_SAVEGAME_VERSION;
-    for (uint8_t i = 1; i < 8; ++i)
+    for (uint8_t i = 0; i < 8; ++i)
       save.bits[i] = 0;
     EepromWriteBlock((struct EepromBlockStruct*)&save);
   }
@@ -1789,7 +1789,7 @@ static void LoadLevel(const uint8_t level)
               HAND_START_X * TILE_WIDTH + (TILE_WIDTH >> 1),
               HAND_START_Y * TILE_HEIGHT + (TILE_HEIGHT >> 1));
 
-  for (uint8_t i = 2; i < MAX_SPRITES - 1; ++i)
+  for (uint8_t i = OVERLAY_SPRITE_START; i < MAX_SPRITES - 1; ++i)
     sprites[i].y = SCREEN_TILES_V * TILE_HEIGHT; // OFF_SCREEN;
 
   // Draw the main breadboard
@@ -5443,8 +5443,8 @@ int main()
         continue;
       }
 
-      // Hide all the sprites
-      for (uint8_t i = 2; i < MAX_SPRITES - 1; ++i)
+      // Hide all the overlay sprites
+      for (uint8_t i = OVERLAY_SPRITE_START; i < MAX_SPRITES - 1; ++i)
         sprites[i].flags |= SPRITE_OFF;
 
       // Play a sound effect that indicates the popup menu, unfortunately if music is playing, a TriggerFx won't work
@@ -5662,8 +5662,8 @@ int main()
         LoadLevel(currentLevel);
       }
 
-      // Show all the sprites
-      for (uint8_t i = 2; i < MAX_SPRITES - 1; ++i)
+      // Show all the overlay sprites
+      for (uint8_t i = OVERLAY_SPRITE_START; i < MAX_SPRITES - 1; ++i)
         sprites[i].flags &= (sprites[i].flags ^ SPRITE_OFF);
 
     }
