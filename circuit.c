@@ -175,16 +175,16 @@ bool switchChanged = false;
 bool startAdvancesLevel = false;
 bool startWinsGame = false;
 
-void BoardChanged(void);
-uint8_t GetLevelColor(uint8_t level);
-void RamFont_Load2Digits(const uint8_t* ramfont, uint8_t ramfont_index, uint8_t number, uint8_t fg_color, uint8_t bg_color);
-
 typedef struct {
   uint16_t held;
   uint16_t prev;
   uint16_t pressed;
   uint16_t released;
 } __attribute__ ((packed)) BUTTON_INFO;
+
+void BoardChanged(BUTTON_INFO* buttons);
+uint8_t GetLevelColor(uint8_t level);
+void RamFont_Load2Digits(const uint8_t* ramfont, uint8_t ramfont_index, uint8_t number, uint8_t fg_color, uint8_t bg_color);
 
 #define TILE_BACKGROUND 0
 #define TILE_FOREGROUND 1
@@ -338,7 +338,7 @@ void cursor_init(CURSOR* const c, const uint8_t tag, const uint8_t tileIndex, co
   c->dx = c->dy = 0;
 }
 
-__attribute__((optimize("O3")))
+//__attribute__((optimize("O3")))
 void cursor_update(CURSOR* c, uint16_t held)
 {
   bool wasLeft = (c->dx < 0);
@@ -2132,6 +2132,11 @@ const uint8_t rf_popup_border[] PROGMEM = {
 void RamFont_Load(const uint8_t* ramfont, uint8_t user_ram_tile_start, uint8_t len, uint8_t fg_color, uint8_t bg_color)
 {
   //SetUserRamTilesCount(len); // commented out to avoid flickering of the current level, call manually before this function is called
+  if (fg_color == bg_color) { // This saves 10's of thousands of clock cycles when the condition is met
+    uint8_t* ramTile = GetUserRamTile(user_ram_tile_start);
+    memset(ramTile, fg_color, len * 64);
+    return;
+  }
   for (uint8_t tile = 0; tile < len; ++tile) {
     uint8_t* ramTile = GetUserRamTile(user_ram_tile_start + tile);
     for (uint8_t row = 0; row < 8; ++row) {
@@ -2640,6 +2645,9 @@ uint8_t CountValidLeftNeighbor(uint8_t flags, uint8_t x, uint8_t y)
     return 0;
 }
 
+// If this function is called with PRUNEBOARD_FLAG_NORMAL, it will prune the board for proper minimal netlist generation. If called
+// with PRUNEBOARD_FLAG_MEETS_RULES, then a switch in any position will not cause a piece properly connected to it to be pruned,
+// which is used during the "meets rules" check to make sure that there aren't any loose ends that don't belong on the board.
 bool PruneBoard(uint8_t flags)
 {
   bool meetsRules = true;
@@ -3206,9 +3214,10 @@ bool PruneBoard(uint8_t flags)
   return meetsRules;
 }
 
-#define DECIDE_NOW  0
-#define DECIDE_INIT 1
-#define DECIDE_NEXT 2
+#define DECIDE_NOW   0
+#define DECIDE_INIT  1
+#define DECIDE_NEXT  2
+#define DECIDE_QUERY 4
 
 /*
  * The decide function avoids having to call many iterations of the
@@ -3237,19 +3246,25 @@ uint8_t decide(uint8_t flags)
 {
   static uint8_t generation = 0;
   static uint8_t bitmask = 1;
+  static bool wasCalled = false;
 
   if (!flags) {
     // decide something
     uint8_t decision = (generation & bitmask);
     bitmask <<= 1;
+    wasCalled |= true;
     return decision ? 1 : 0;
   }
 
   if (flags & DECIDE_INIT) {
     generation = 0;
     bitmask = 1;
+    wasCalled = false;
     return 0;
   }
+
+  if (flags & DECIDE_QUERY)
+    return wasCalled;
 
   if (flags & DECIDE_NEXT) {
     ++generation;
@@ -4058,6 +4073,13 @@ void SimulateElectrons(uint8_t nl_src, int8_t x, int8_t y, uint8_t d) {
     for (uint8_t i = 0; i < 2; ++i) { // using the fewest number of electrons
       uint8_t result = SimulateElectron(nl_src, x, y, d);
       pruned_netlist[result][nl_src] = pruned_netlist[nl_src][result] = 1;
+
+      // If the first electron did not hit a branch (TPIECE), it wouldn't have called the decide
+      // function, and therefore we don't need to send any more electrons from nl_src, because
+      // they will also never branch. This saves a ton of clock cycles (3000-4000 typically, but
+      // sometimes 13000+ clocks).
+      if (!decide(DECIDE_QUERY))
+        return;
     }
     decide(DECIDE_NEXT);
   }
@@ -4233,12 +4255,12 @@ const uint8_t pgm_W_PRESS_START[] PROGMEM = { RAM_TILES_COUNT, W_P, W_R, W_E, W_
 const uint8_t pgm_W_EPIC_WIN[] PROGMEM = { W_P, W_R, W_E, W_S, W_S, RAM_TILES_COUNT, W_S, W_T, W_A, W_R, W_T, RAM_TILES_COUNT, W_F, W_O, W_R, RAM_TILES_COUNT, W_E, W_P, W_I, W_C, RAM_TILES_COUNT, W_W, W_I, W_N };
 
 const uint8_t fade[] PROGMEM = { 0x09, 0x12, 0x1B, 0x24, 0x2D, 0x36, 0x3F };
-const uint8_t win_fade[] PROGMEM = { 0x07, 0x1F, 0x3F, 0x38, 0xC8, 0x8C };
+const uint8_t win_fade[] PROGMEM = { 0x07, 0x1F, 0x3F, 0x38, 0xC8, 0x8C, 0x07, 0x1F, 0x3F, 0x38, 0xC8, 0x8C, 0x07, 0x1F, 0x3F, 0x38, 0xC8, 0x8C, 0xF0 };
 
 void CancelStartAdvancesLevel(void)
 {
   if (startAdvancesLevel) {
-    for (uint8_t i = HAND_START_X + MAP_ADDTOGRID_WIDTH; i < HAND_START_X + sizeof(pgm_W_PRESS_START); ++i)
+    for (uint8_t i = HAND_START_X; i < HAND_START_X + sizeof(pgm_W_PRESS_START); ++i)
       SetTile(i, HAND_START_Y - 2, TILE_BACKGROUND);
     DrawMap(HAND_START_X, HAND_START_Y - 2, map_addtogrid);
     SetUserRamTilesCount(GAME_USER_RAM_TILES_COUNT);
@@ -4246,7 +4268,7 @@ void CancelStartAdvancesLevel(void)
   }
 }
 
-void BoardChanged(void)
+void BoardChanged(BUTTON_INFO* buttons)
 {
   //cli();
   //__asm__ __volatile__ ("wdr");
@@ -4717,26 +4739,35 @@ void BoardChanged(void)
 #define VSYNC_PER_FADE 3
 #define VSYNC_PER_WIN_FADE 3
 
+      // Create a backup of the current state of the buttons
+      BUTTON_INFO backupBI;
+      memcpy(&backupBI, buttons, sizeof(BUTTON_INFO));
+      bool pushedStart = false;
+
       SetUserRamTilesCount(GAME_USER_RAM_TILES_COUNT + 13);
       if (startWinsGame) {
         RamFont_Load(rf_win, GAME_USER_RAM_TILES_COUNT, sizeof(rf_win) / 8, 0x00, 0x00);
-        RamFont_Load(rf_help + ('W' - 'A') * 8, W_W, 1, 0x00, 0x00);
         RamFont_Print(HAND_START_X + 3, HAND_START_Y - 2, pgm_W_EPIC_WIN, sizeof(pgm_W_EPIC_WIN));
 
-        for (uint8_t i = 0; i < 3; ++i) {
-          uint8_t col = 0;
-          for (;;) {
-            WaitVsync(VSYNC_PER_WIN_FADE);
-            RamFont_Load(rf_win, GAME_USER_RAM_TILES_COUNT, sizeof(rf_win) / 8, pgm_read_byte(&win_fade[col]), 0x00);
-            RamFont_Load(rf_help + ('W' - 'A') * 8, W_W, 1, pgm_read_byte(&win_fade[col]), 0x00);
-            if ((++col == sizeof(win_fade)) || ReadJoypad(0) & BTN_START)
-              break;
+        uint8_t col = 0;
+        for (;;) {
+          WaitVsync(VSYNC_PER_WIN_FADE);
+          RamFont_Load(rf_win, GAME_USER_RAM_TILES_COUNT, sizeof(rf_win) / 8, pgm_read_byte(&win_fade[col]), 0x00);
+          RamFont_Load(rf_help + ('W' - 'A') * 8, W_W, 1, pgm_read_byte(&win_fade[col]), 0x00);
+
+          buttons->prev = buttons->held;
+          buttons->held = ReadJoypad(0);
+          buttons->pressed = buttons->held & (buttons->held ^ buttons->prev);
+          buttons->released = buttons->prev & (buttons->held ^ buttons->prev);
+
+          // If we pressed start (and only start) early, then we want this new button state to carry back into the calling function
+          if (buttons->pressed & BTN_START && buttons->held == BTN_START) {
+            pushedStart = true;
+            break;
           }
-          if (ReadJoypad(0) & BTN_START)
+          if (++col == sizeof(win_fade))
             break;
         }
-        RamFont_Load(rf_win, GAME_USER_RAM_TILES_COUNT, sizeof(rf_win) / 8, 0xF0, 0x00);
-        RamFont_Load(rf_help + ('W' - 'A') * 8, W_W, 1, 0xF0, 0x00);
       } else {
         RamFont_Load(rf_win, GAME_USER_RAM_TILES_COUNT, sizeof(rf_win) / 8, 0x00, 0x00);
         RamFont_Print(HAND_START_X, HAND_START_Y - 2, pgm_W_PRESS_START, sizeof(pgm_W_PRESS_START));
@@ -4745,10 +4776,28 @@ void BoardChanged(void)
         for (;;) {
           WaitVsync(VSYNC_PER_FADE);
           RamFont_Load(rf_win, GAME_USER_RAM_TILES_COUNT, sizeof(rf_win) / 8, pgm_read_byte(&fade[col]), 0x00);
-          if ((++col == sizeof(fade)) || ReadJoypad(0) & BTN_START)
+
+          buttons->prev = buttons->held;
+          buttons->held = ReadJoypad(0);
+          buttons->pressed = buttons->held & (buttons->held ^ buttons->prev);
+          buttons->released = buttons->prev & (buttons->held ^ buttons->prev);
+
+          // If we pressed start (and only start) early, then we want this new button state to carry back into the calling function
+          if (buttons->pressed & BTN_START && buttons->held == BTN_START) {
+            pushedStart = true;
+            break;
+          }
+          if (++col == sizeof(fade))
             break;
         }
       }
+
+      // If we didn't press start to end the animation early, pretend we never called ReadJoypad.
+      // This allows for (non-START) button presses that happened during the "freeze" when the fade was happening to occur as soon
+      // as we return into the calling function. So if you try to pick up a piece during the UI freeze, it will just be delayed
+      // instead of having this function eat the initial press and requiring a release and press to occur for it to be picked up.
+      if (!pushedStart)
+        memcpy(buttons, &backupBI, sizeof(BUTTON_INFO));
 
 #if defined(OPTION_HIDE_CURSOR_DURING_LEVEL_COMPLETE)
       // Show the cursor
@@ -4811,6 +4860,12 @@ const char HELP_TXT[] PROGMEM = {
 
 void EpicWin(BUTTON_INFO* buttons)
 {
+  // Ensure no sprites that were visible on the previous screen carry over for a single frame onto this one
+  SetUserRamTilesCount(RAM_TILES_COUNT);
+  for (uint8_t i = 0; i < MAX_SPRITES; ++i)
+    sprites[i].y = SCREEN_TILES_V * TILE_HEIGHT; // OFF_SCREEN;
+  WaitVsync(1);
+
   ClearVram();
   SetTileTable(win_tileset);
 
@@ -4823,14 +4878,12 @@ void EpicWin(BUTTON_INFO* buttons)
 
   startWinsGame = false;
 
-  SetUserRamTilesCount(RAM_TILES_COUNT);
   RamFont_Load(rf_help, 0, sizeof(rf_help) / 8, 0x00, 0xF0);
   RamFont_Print((SCREEN_TILES_H - sizeof(pgm_T_CONGRATULATIONS)) / 2, 10, pgm_T_CONGRATULATIONS, sizeof(pgm_T_CONGRATULATIONS));
   RamFont_Print((SCREEN_TILES_H - sizeof(pgm_T_YOU_SOLVED)) / 2, 13, pgm_T_YOU_SOLVED, sizeof(pgm_T_YOU_SOLVED));
 
   uint8_t frameCounter = 0;
   for (;;) {
-    WaitVsync(1);
     if (frameCounter == 0)
       DrawMap((SCREEN_TILES_H - 5) / 2, SCREEN_TILES_V - 8, map_win_left);
 
@@ -4855,6 +4908,9 @@ void EpicWin(BUTTON_INFO* buttons)
     ++frameCounter;
     if (frameCounter == 35)
       frameCounter = 0;
+
+    // By doing this down here, we ensure both the text and graphic appear in the same frame
+    WaitVsync(1);
   }
 
   ClearVram();
@@ -5414,7 +5470,7 @@ int main()
         met_goal[i] = false;
 
     if (boardChanged || switchChanged)
-      BoardChanged();
+      BoardChanged(&buttons);
 
     // -------------------- PROCESS POPUP MENU --------------------
     // If we pressed the START button with no other buttons held down
@@ -5434,9 +5490,10 @@ int main()
         currentLevel++;
         if (currentLevel > 60)
           currentLevel = 1;
-        for (uint8_t i = HAND_START_X + MAP_ADDTOGRID_WIDTH; i < HAND_START_X + sizeof(pgm_W_PRESS_START); ++i)
+        for (uint8_t i = HAND_START_X; i < HAND_START_X + sizeof(pgm_W_PRESS_START); ++i)
           SetTile(i, HAND_START_Y - 2, TILE_BACKGROUND);
         SetUserRamTilesCount(GAME_USER_RAM_TILES_COUNT);
+        WaitVsync(1); // Avoid single frame glitches after changing the user ram tile count
         LoadLevel(currentLevel);
         startAdvancesLevel = false;
         continue;
