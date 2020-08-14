@@ -2,7 +2,7 @@ CC           = gcc
 CXX          = g++
 COMPILE_LINK = -flto -O3
 C_CXX_FLAGS  = -Wall -Wextra -Winline -gdwarf-2
-DEPGEN       = -MD -MP -MT $(*F).o -MF $(@F).d
+DEPGEN       = -MD -MP -MT $(*F).o -MF $(@D)/$(@F).d
 DEPS         = $(OBJECTS:%.o=%.o.d)
 CFLAGS       = $(COMPILE_LINK) $(DEPGEN) $(C_CXX_FLAGS)
 CFLAGS      += -std=gnu11

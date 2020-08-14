@@ -11,7 +11,7 @@
   example: rbtree+setinsert.h should include this header, but main.c
   should not.
 
-  Copyright 2009-2012 Matthew T. Pandina. All rights reserved.
+  Copyright 2009-2020 Matthew T. Pandina. All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -46,7 +46,8 @@
 static inline void LeftRotate(rbtree_t *self, rbtree_node_t *x) {
   rbtree_node_t *y = x->right;
   x->right = y->left;
-  y->left->parent = x;
+  if (y->left != self->nil)
+    y->left->parent = x;
   y->parent = x->parent;
   if (x->parent == self->nil)
     self->root = y;
@@ -63,7 +64,8 @@ static inline void LeftRotate(rbtree_t *self, rbtree_node_t *x) {
 static inline void RightRotate(rbtree_t *self, rbtree_node_t *y) {
   rbtree_node_t *x = y->left;
   y->left = x->right;
-  x->right->parent = y;
+  if (x->right != self->nil)
+    x->right->parent = y;
   x->parent = y->parent;
   if (y->parent == self->nil)
     self->root = x;

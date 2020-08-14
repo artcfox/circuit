@@ -5,7 +5,7 @@
   Implements the Red-Black Tree algorithm as described in
   "Introduction to Algorithms"
 
-  Copyright 2009-2012 Matthew T. Pandina. All rights reserved.
+  Copyright 2009-2020 Matthew T. Pandina. All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -47,7 +47,7 @@ struct _rbtree_node_t {
   rbtree_node_t *left;
   rbtree_node_t *right;
   rbtree_node_t *parent;
-};
+} __attribute__ ((packed));
 
 typedef struct _rbtree_t rbtree_t;
 struct _rbtree_t {
@@ -55,7 +55,7 @@ struct _rbtree_t {
   rbtree_node_t *root;
   unsigned int rbtree_node_t_size;
   int (*Compare)(const rbtree_node_t *x, const rbtree_node_t *y);
-};
+} __attribute__ ((packed));
 
 void rbtree_init(rbtree_t *self,
                  rbtree_node_t *nil,

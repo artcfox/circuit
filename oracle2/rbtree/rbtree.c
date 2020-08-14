@@ -5,7 +5,7 @@
   Implements the Red-Black Tree algorithm as described in
   "Introduction to Algorithms"
 
-  Copyright 2009-2012 Matthew T. Pandina. All rights reserved.
+  Copyright 2009-2020 Matthew T. Pandina. All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions

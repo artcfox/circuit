@@ -6,7 +6,7 @@
   that only performs the insert if the item is not already in the
   tree. Note that duplicates are silently discarded.
 
-  Copyright 2009-2012 Matthew T. Pandina. All rights reserved.
+  Copyright 2009-2020 Matthew T. Pandina. All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -38,4 +38,4 @@
 
 #include "rbtree.r"
 
-void rbtree_setinsert(rbtree_t *self, rbtree_node_t *z);
+int rbtree_setinsert(rbtree_t *self, rbtree_node_t *z);

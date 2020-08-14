@@ -6,7 +6,7 @@
   that only performs the insert if the item is not already in the
   tree. Note that duplicates are silently discarded.
 
-  Copyright 2009-2012 Matthew T. Pandina. All rights reserved.
+  Copyright 2009-2020 Matthew T. Pandina. All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -36,7 +36,7 @@
 
 #include "rbtree+setinsert.h"
 
-void rbtree_setinsert(rbtree_t *self, rbtree_node_t *z) {
+int rbtree_setinsert(rbtree_t *self, rbtree_node_t *z) {
   rbtree_node_t *y = self->nil;
   rbtree_node_t *x = self->root;
   int unique = 1;
@@ -48,7 +48,7 @@ void rbtree_setinsert(rbtree_t *self, rbtree_node_t *z) {
       x = x->right;
   }
   if (!unique)
-    return;
+    return 0;
 
   z->parent = y;
   if (y == self->nil)
@@ -63,4 +63,5 @@ void rbtree_setinsert(rbtree_t *self, rbtree_node_t *z) {
   z->right = self->nil;
   z->color = RBTREE_NODE_COLOR_RED;
   InsertFixup(self, z);
+  return 1;
 }

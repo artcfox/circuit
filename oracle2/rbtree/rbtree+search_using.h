@@ -6,7 +6,7 @@
   that performs a search using an alternate CompareFunc. Note that
   only the first match is returned.
 
-  Copyright 2009-2012 Matthew T. Pandina. All rights reserved.
+  Copyright 2009-2020 Matthew T. Pandina. All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
