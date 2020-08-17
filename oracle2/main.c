@@ -6,8 +6,8 @@
 
 #include "netlist_node.h"
 
-/* This is copied and pasted from the switch statement in circuit.c,
-   and then massaged to have the appropriate bits tacked on to each
+/* This was cut and pasted from the switch statement in circuit.c, and
+   then massaged to have the appropriate LED-on bits tacked on to each
    element */
 uint32_t unsorted_netlists[] =
 {
@@ -174,7 +174,7 @@ uint32_t SwapColors(uint32_t netlist_and_led_states, uint8_t flag)
     };
 
   uint32_t netlist = netlist_and_led_states & NETLIST_NETLIST_MASK;
-  uint32_t led_states = netlist_and_led_states & NETLIST_FLAG_MASK;
+  uint32_t led_states = netlist_and_led_states & NETLIST_LED_STATES_MASK;
 
   // Turn the netlist back into the matrix version
   uint32_t bitmask = 1;
@@ -362,8 +362,147 @@ uint32_t SwapColors(uint32_t netlist_and_led_states, uint8_t flag)
   /*     printf("FOUND PERMUTATION!\n"); */
   /* } */
 
-  // XXX change this to return the permuted netlist_and_led_states
+  // Return the permuted netlist_and_led_states
   return repacked_netlist;
+}
+
+void netlist_print_dot(FILE *stream, const rbtree_node_t *node) {
+  uint8_t pruned_netlist[8][8] = {
+    { 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0 },
+  };
+
+  const uint8_t packedNetlistY[] =
+    {
+     NL_GA,
+     NL_YC, NL_YC,
+     NL_YA, NL_YA, NL_YA,
+     NL_RC, NL_RC, NL_RC, NL_RC,
+     NL_RA, NL_RA, NL_RA, NL_RA, NL_RA,
+     NL_00, NL_00, NL_00, NL_00, NL_00, NL_00,
+     NL_VV, NL_VV, NL_VV, NL_VV, NL_VV, NL_VV, /*NL_VV,*/ // highest bit assumed to be 0, we don't store short circuits
+    };
+
+  const uint8_t packedNetlistX[] =
+    {
+     NL_GC,
+     NL_GC, NL_GA,
+     NL_GC, NL_GA, NL_YC,
+     NL_GC, NL_GA, NL_YC, NL_YA,
+     NL_GC, NL_GA, NL_YC, NL_YA, NL_RC,
+     NL_GC, NL_GA, NL_YC, NL_YA, NL_RC, NL_RA,
+     NL_GC, NL_GA, NL_YC, NL_YA, NL_RC, NL_RA, /*NL_VV,*/ // highest bit assumed to be 0, we don't store short circuits
+    };
+
+  uint32_t netlist_and_led_states = ((const netlist_node_t *)node)->n.netlist_and_led_states;
+  uint32_t netlist = netlist_and_led_states & NETLIST_NETLIST_MASK;
+  uint32_t led_states = netlist_and_led_states & NETLIST_LED_STATES_MASK;
+
+  // Turn the netlist back into the matrix version
+  uint32_t bitmask = 1;
+  for (uint8_t i = 0; i < 27; ++i) {
+    if (netlist & bitmask)
+      pruned_netlist[packedNetlistY[i]][packedNetlistX[i]] = pruned_netlist[packedNetlistX[i]][packedNetlistY[i]] = 1;
+    bitmask <<= 1;
+  }
+
+  // Fill in the diagonals
+  for (uint8_t i = 0; i < 8; ++i)
+    pruned_netlist[i][i] = 1;
+
+  fprintf(stream,
+          "<"
+          "<table border=\"0\" cellborder=\"1\" cellspacing=\"0\">"
+          "<tr><td colspan=\"9\">0x%08x</td></tr>"
+          "<tr><td colspan=\"3\" bgcolor=\"%s\">%s</td><td colspan=\"3\" bgcolor=\"%s\">%s</td><td colspan=\"3\" bgcolor=\"%s\">%s</td></tr>"
+          "<tr><td></td><td>+</td><td>-</td><td>R</td><td>r</td><td>Y</td><td>y</td><td>G</td><td>g</td></tr>"
+          "<tr><td>+</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
+          "<tr><td>-</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
+          "<tr><td>R</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
+          "<tr><td>r</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
+          "<tr><td>Y</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
+          "<tr><td>y</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
+          "<tr><td>G</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
+          "<tr><td>g</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
+          "</table>"
+          ">",
+          netlist,
+          (led_states & NETLIST_R_ON) ? "red" : "white",
+          (led_states & NETLIST_R_ON) ? "R" : "",
+          (led_states & NETLIST_Y_ON) ? "yellow" : "white",
+          (led_states & NETLIST_Y_ON) ? "Y" : "",
+          (led_states & NETLIST_G_ON) ? "green" : "white",
+          (led_states & NETLIST_G_ON) ? "G" : "",
+          pruned_netlist[0][0] ? "x" : "",
+          pruned_netlist[0][1] ? "x" : "",
+          pruned_netlist[0][2] ? "x" : "",
+          pruned_netlist[0][3] ? "x" : "",
+          pruned_netlist[0][4] ? "x" : "",
+          pruned_netlist[0][5] ? "x" : "",
+          pruned_netlist[0][6] ? "x" : "",
+          pruned_netlist[0][7] ? "x" : "",
+          pruned_netlist[1][0] ? "x" : "",
+          pruned_netlist[1][1] ? "x" : "",
+          pruned_netlist[1][2] ? "x" : "",
+          pruned_netlist[1][3] ? "x" : "",
+          pruned_netlist[1][4] ? "x" : "",
+          pruned_netlist[1][5] ? "x" : "",
+          pruned_netlist[1][6] ? "x" : "",
+          pruned_netlist[1][7] ? "x" : "",
+          pruned_netlist[2][0] ? "x" : "",
+          pruned_netlist[2][1] ? "x" : "",
+          pruned_netlist[2][2] ? "x" : "",
+          pruned_netlist[2][3] ? "x" : "",
+          pruned_netlist[2][4] ? "x" : "",
+          pruned_netlist[2][5] ? "x" : "",
+          pruned_netlist[2][6] ? "x" : "",
+          pruned_netlist[2][7] ? "x" : "",
+          pruned_netlist[3][0] ? "x" : "",
+          pruned_netlist[3][1] ? "x" : "",
+          pruned_netlist[3][2] ? "x" : "",
+          pruned_netlist[3][3] ? "x" : "",
+          pruned_netlist[3][4] ? "x" : "",
+          pruned_netlist[3][5] ? "x" : "",
+          pruned_netlist[3][6] ? "x" : "",
+          pruned_netlist[3][7] ? "x" : "",
+          pruned_netlist[4][0] ? "x" : "",
+          pruned_netlist[4][1] ? "x" : "",
+          pruned_netlist[4][2] ? "x" : "",
+          pruned_netlist[4][3] ? "x" : "",
+          pruned_netlist[4][4] ? "x" : "",
+          pruned_netlist[4][5] ? "x" : "",
+          pruned_netlist[4][6] ? "x" : "",
+          pruned_netlist[4][7] ? "x" : "",
+          pruned_netlist[5][0] ? "x" : "",
+          pruned_netlist[5][1] ? "x" : "",
+          pruned_netlist[5][2] ? "x" : "",
+          pruned_netlist[5][3] ? "x" : "",
+          pruned_netlist[5][4] ? "x" : "",
+          pruned_netlist[5][5] ? "x" : "",
+          pruned_netlist[5][6] ? "x" : "",
+          pruned_netlist[5][7] ? "x" : "",
+          pruned_netlist[6][0] ? "x" : "",
+          pruned_netlist[6][1] ? "x" : "",
+          pruned_netlist[6][2] ? "x" : "",
+          pruned_netlist[6][3] ? "x" : "",
+          pruned_netlist[6][4] ? "x" : "",
+          pruned_netlist[6][5] ? "x" : "",
+          pruned_netlist[6][6] ? "x" : "",
+          pruned_netlist[6][7] ? "x" : "",
+          pruned_netlist[7][0] ? "x" : "",
+          pruned_netlist[7][1] ? "x" : "",
+          pruned_netlist[7][2] ? "x" : "",
+          pruned_netlist[7][3] ? "x" : "",
+          pruned_netlist[7][4] ? "x" : "",
+          pruned_netlist[7][5] ? "x" : "",
+          pruned_netlist[7][6] ? "x" : "",
+          pruned_netlist[7][7] ? "x" : "");
 }
 
 void Insert(rbtree_t* tree, uint32_t netlist)
@@ -408,7 +547,7 @@ int main(int argc, char *argv[]) {
     inputCount++;
   }
 
-  // XXX - TODO - Here is where we should loop over unsorted_netlists, swapping the colors around to ensure we have full coverage
+  // Loop over unsorted_netlists, swapping the colors around to ensure we have full coverage
 
 ////  puts("\nUnique and Sorted\n");
 
@@ -421,21 +560,27 @@ int main(int argc, char *argv[]) {
        itr != myNilRef;
        itr = rbtree_successor(&tree, itr)) {
 
-    uint32_t netlist = ((netlist_node_t *)itr)->n.netlist_and_flags;
+    uint32_t netlist = ((netlist_node_t *)itr)->n.netlist_and_led_states;
     printf("  0x%08x,\n", netlist);
     outputCount++;
   }
 
   puts("};");
 
-  // Just for fun, dump the state of the red-black tree
-  #include "rbtree/rbtree+debug.h"
-  FILE *output = fopen("output.dot", "w");
-  rbtree_print_dot(&tree, output, netlist_print_dot, 0, 0);
-  fclose(output);
+  // Just for fun, dump the state of the red-black tree. To turn this
+  // into a PNG file, run the following command:
+  //
+  //   dot -Tpng rbtree.dot -o rbtree.png
+  //
+  FILE *dotfile = fopen("rbtree.dot", "w");
+  rbtree_print_dot(&tree, dotfile, netlist_print_dot, "shape=plain color=black fontcolor=black fontname=mono", "color=red");
+  fclose(dotfile);
 
   // Cleanup the Red-Black Tree
-  rbtree_postorderwalk(&tree, netlist_node_delete, 0);
+  for (rbtree_node_t *itr = rbtree_minimum(&tree); itr != myNilRef; itr = rbtree_minimum(&tree)) {
+    rbtree_delete(&tree, itr);
+    free(itr);
+  }
   rbtree_destroy(&tree);
 
   fprintf(stderr, "\nPermuting known netlists\n");

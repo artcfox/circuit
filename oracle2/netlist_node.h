@@ -4,6 +4,7 @@
 
 #include "rbtree/rbtree.h"
 #include "rbtree/rbtree+setinsert.h"
+#include "rbtree/rbtree+debug.h"
 
 #include "netlist.h"
 
@@ -17,19 +18,13 @@ rbtree_node_t *netlist_node_new(struct netlist *n) {
   return (rbtree_node_t *)self;
 }
 
-void netlist_node_delete(rbtree_node_t *self, void *context) {
-  (void)context;
-  free(self);
-  self = NULL;
-}
-
 int netlist_node_compare(const rbtree_node_t *x, const rbtree_node_t *y) {
-  uint32_t x_netlist_and_flags = ((const netlist_node_t *)x)->n.netlist_and_flags;
-  uint32_t y_netlist_and_flags = ((const netlist_node_t *)y)->n.netlist_and_flags;
-  uint32_t x_netlist = x_netlist_and_flags & NETLIST_NETLIST_MASK;
-  uint32_t y_netlist = y_netlist_and_flags & NETLIST_NETLIST_MASK;
-  /* uint32_t x_flags = x_netlist_and_flags & NETLIST_FLAG_MASK; */
-  /* uint32_t y_flags = y_netlist_and_flags & NETLIST_FLAG_MASK; */
+  uint32_t x_netlist_and_led_states = ((const netlist_node_t *)x)->n.netlist_and_led_states;
+  uint32_t y_netlist_and_led_states = ((const netlist_node_t *)y)->n.netlist_and_led_states;
+  uint32_t x_netlist = x_netlist_and_led_states & NETLIST_NETLIST_MASK;
+  uint32_t y_netlist = y_netlist_and_led_states & NETLIST_NETLIST_MASK;
+  /* uint32_t x_flags = x_netlist_and_led_states & NETLIST_LED_STATES_MASK; */
+  /* uint32_t y_flags = y_netlist_and_led_states & NETLIST_LED_STATES_MASK; */
 
   if (x_netlist == y_netlist)
     return 0;
@@ -37,16 +32,4 @@ int netlist_node_compare(const rbtree_node_t *x, const rbtree_node_t *y) {
     return -1;
   else /*if (x_netlist > y_netlist)*/
     return 1;
-}
-
-void netlist_print_dot(FILE *stream, const rbtree_node_t *node) {
-  uint32_t netlist_and_flags = ((const netlist_node_t *)node)->n.netlist_and_flags;
-  uint32_t netlist = netlist_and_flags & NETLIST_NETLIST_MASK;
-  uint32_t flags = netlist_and_flags & NETLIST_FLAG_MASK;
-
-  fprintf(stream, "\"%s%s%s\\n%07x\"",
-          (flags & NETLIST_R_ON) ? "R" : "",
-          (flags & NETLIST_Y_ON) ? "Y" : "",
-          (flags & NETLIST_G_ON) ? "G" : "",
-          netlist);
 }
