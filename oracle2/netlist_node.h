@@ -38,3 +38,15 @@ int netlist_node_compare(const rbtree_node_t *x, const rbtree_node_t *y) {
   else /*if (x_netlist > y_netlist)*/
     return 1;
 }
+
+void netlist_print_dot(FILE *stream, const rbtree_node_t *node) {
+  uint32_t netlist_and_flags = ((const netlist_node_t *)node)->n.netlist_and_flags;
+  uint32_t netlist = netlist_and_flags & NETLIST_NETLIST_MASK;
+  uint32_t flags = netlist_and_flags & NETLIST_FLAG_MASK;
+
+  fprintf(stream, "\"%s%s%s\\n%07x\"",
+          (flags & NETLIST_R_ON) ? "R" : "",
+          (flags & NETLIST_Y_ON) ? "Y" : "",
+          (flags & NETLIST_G_ON) ? "G" : "",
+          netlist);
+}

@@ -13,7 +13,7 @@ LDFLAGS      = $(COMPILE_LINK)
 LDFLAGS     += 
 EXECUTABLE  ?= main
 OBJECTS      = main.o
-OBJECTS     += rbtree/rbtree.o rbtree/rbtree+setinsert.o
+OBJECTS     += rbtree/rbtree.o rbtree/rbtree+setinsert.o rbtree/rbtree+debug.o
 
 all: $(EXECUTABLE)
 

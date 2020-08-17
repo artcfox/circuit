@@ -428,6 +428,12 @@ int main(int argc, char *argv[]) {
 
   puts("};");
 
+  // Just for fun, dump the state of the red-black tree
+  #include "rbtree/rbtree+debug.h"
+  FILE *output = fopen("output.dot", "w");
+  rbtree_print_dot(&tree, output, netlist_print_dot, 0, 0);
+  fclose(output);
+
   // Cleanup the Red-Black Tree
   rbtree_postorderwalk(&tree, netlist_node_delete, 0);
   rbtree_destroy(&tree);
