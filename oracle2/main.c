@@ -507,8 +507,10 @@ void netlist_print_dot(FILE *stream, const rbtree_node_t *node) {
 
 void Insert(rbtree_t* tree, uint32_t netlist)
 {
-  struct netlist n = { netlist };
-  rbtree_setinsert(tree, netlist_node_new(&n));
+  struct netlist nl = { netlist };
+  rbtree_node_t *n = netlist_node_new(&nl);
+  if (!rbtree_setinsert(tree, n))
+    free(n);
 }
 
 /* This will generate a sorted list of netlists, with the solution
