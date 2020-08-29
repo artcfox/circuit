@@ -4491,7 +4491,7 @@ void BoardChanged(BUTTON_INFO* buttons)
     };
 
   bool isShort = false;
-    // If we always check for a short, the 28th bit can always be 0, and then we only need to store 2^27 3-bit LED states
+    // If we always check for a short, the 28th bit can always be 0, and then we only need to use 27 bits
   if (pruned_netlist[NL_00][NL_VV]) {
     isShort = true;
     TriggerNote(SFX_CHANNEL, SFX_ZAP, SFX_SPEED_ZAP, SFX_VOL_ZAP);
@@ -4508,7 +4508,7 @@ void BoardChanged(BUTTON_INFO* buttons)
     }
 
   } else {
-    // If there is not a short, ensure the + and - of the VCC and GND tokens is white
+    // If there is not a short, ensure the + and - of the VCC and GND tokens are white
     if (vccx >= 0 && vccy >= 0)
       SetTile(BOARD_START_X + vccx * BOARD_H_SPACING + 1, BOARD_START_Y + vccy * BOARD_V_SPACING + 1, TILE_VCC);
     if (gndx >= 0 && gndy >= 0) {
@@ -4890,10 +4890,10 @@ void EpicWin(BUTTON_INFO* buttons)
     if (frameCounter == 17)
       DrawMap((SCREEN_TILES_H - 5) / 2, SCREEN_TILES_V - 8, map_win_right);
 
-        buttons->prev = buttons->held;
-        buttons->held = ReadJoypad(0);
-        buttons->pressed = buttons->held & (buttons->held ^ buttons->prev);
-        buttons->released = buttons->prev & (buttons->held ^ buttons->prev);
+    buttons->prev = buttons->held;
+    buttons->held = ReadJoypad(0);
+    buttons->pressed = buttons->held & (buttons->held ^ buttons->prev);
+    buttons->released = buttons->prev & (buttons->held ^ buttons->prev);
 
     if (buttons->pressed & BTN_START)
       break;
