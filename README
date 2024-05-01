@@ -1,0 +1,39 @@
+Genre: Puzzle
+Developer: Matt Pandina
+Release date: August, 1, 2020
+
+Background
+
+The Uzebox is a retro-minimalist homebrew game console, created in
+2008 by Alec Bourque. It is based on an AVR 8-bit general purpose
+microcontroller made by Atmel. The microcontroller is overclocked to
+run at 28.61818 MHz, and only has a total of 4 KB of RAM, and 64 KB of
+program memory.
+
+About Circuit Puzzle
+
+Circuit Puzzle is a Uzebox implementation of an electricity-based
+puzzle game. Gameplay is similar to both of my Laser Puzzle games, but
+with many improvements to the user interface.
+
+It has 60 levels, divided up into the following skill levels:
+Beginner, Intermediate, Advanced, and Expert.
+
+For each circuit, arrange the tokens to form a continuous pathway from
+VCC to GND that lights up the designated LEDs. All tokens must be
+used, and there can be no loose ends, except on the SWITCH and GND
+tokens. There is a built-in rule checker to help. The normal rules of
+electrical current and LEDs apply. Avoid creating short circuits.
+
+Play Circuit Puzzle
+
+If you don't have a Uzebox video game console, you can play it using
+an online Uzebox emulator: https://artcfox.github.io/circuit/
+
+Using a keyboard is preferred, but the touch controls should allow you
+to at least preview the gameplay if you are on a mobile device. The
+native desktop emulator supports USB SNES game controllers, or you can
+build your own Uzebox game console: https://uzebox.org/
+
+Read the discussion thread for Circuit Puzzle on the Uzebox forum:
+https://uzebox.org/forums/viewtopic.php?t=11115
